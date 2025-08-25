@@ -19,8 +19,8 @@ def main():
         # print(check_icmp(domain))
         # print(check_http(domain))
         print(domain)
-        print(f"HTTP: {check_http(domain)}")
-        print(f"HTTPS: {check_https(domain)}")
+        # print(f"HTTP: {check_http(domain)}")
+        # print(f"HTTPS: {check_https(domain)}")
         asyncio.run(check_quic(domain))
         print("")
 
