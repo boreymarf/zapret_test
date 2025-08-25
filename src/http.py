@@ -1,13 +1,22 @@
-import requests
-from requests.exceptions import SSLError, Timeout, ConnectionError
+from aiohttp import ClientSession, ClientTimeout
 
 
-def check_http(hostname):
+async def check_http(domainname):
     try:
-        response = requests.get(f"https://{hostname}", timeout=2)
-        status = response.status_code
-        return status == 200
-    except (Timeout, ConnectionError, SSLError):
-        return False
+        async with ClientSession(
+            timeout=ClientTimeout(2),
+            max_line_size=16380,
+            max_field_size=16380
+        ) as session:
+            async with session.get(f"http://{domainname}") as resp:
+                if resp.status == 200:
+                    print(f"{domainname:20} | HTTP  | OK")
+                elif resp.status == 503:
+                    print(f"{domainname:20} | HTTP  | Unreachable")
+                else:
+                    print(f"{domainname:20} | HTTP  | {resp.status}")
+    except TimeoutError:
+        print(f"{domainname:20} | HTTP  | Timeout")
     except Exception as e:
-        raise e
+        print(f"Unexpected error: {e}")
+        raise

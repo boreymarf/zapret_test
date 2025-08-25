@@ -5,25 +5,44 @@ from src.domains import domains
 from src.quic import check_quic
 
 import asyncio
+import socket
 
 
-def main():
+async def main():
 
     if check_zapret():
         print("Zapret is active!")
     else:
         print("Zapret is not active!\n")
 
+    semaphore = asyncio.Semaphore(10)
+
+    tasks = []
     for domain in domains:
+        async with semaphore:
+            task = asyncio.create_task(check_http(domain))
+            tasks.append(task)
 
-        # print(check_icmp(domain))
-        # print(check_http(domain))
-        print(domain)
-        # print(f"HTTP: {check_http(domain)}")
-        # print(f"HTTPS: {check_https(domain)}")
-        asyncio.run(check_quic(domain))
-        print("")
+    await asyncio.gather(*tasks)
 
+    tasks = []
+    for domain in domains:
+        async with semaphore:
+            task = asyncio.create_task(check_https(domain))
+            tasks.append(task)
+
+    await asyncio.gather(*tasks)
+
+    tasks = []
+    for domain in domains:
+        async with semaphore:
+            task = asyncio.create_task(check_quic(domain))
+            tasks.append(task)
+
+    await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
-    main()
+
+    print(socket.gethostbyaddr("188.186.146.207"))
+
+    asyncio.run(main())
