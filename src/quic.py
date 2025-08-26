@@ -2,6 +2,10 @@ from aioquic.quic.configuration import QuicConfiguration
 from aioquic.asyncio.client import connect
 from aioquic.asyncio.protocol import QuicConnectionProtocol
 from aioquic.quic.events import ConnectionTerminated
+from dataclasses import dataclass
+
+import logging
+import ssl
 
 ERROR_CODES = {
     0: "NO_ERROR",
@@ -10,6 +14,12 @@ ERROR_CODES = {
 }
 
 code = 0
+
+
+@dataclass
+class QuicCheckResult:
+    success: bool
+    details: str | None
 
 
 class DummyProtocol(QuicConnectionProtocol):
@@ -27,32 +37,49 @@ class DummyProtocol(QuicConnectionProtocol):
             code = event.error_code
 
 
-async def check_quic(hostname: str):
+async def check_quic(domain_name: str):
+
     configuration = QuicConfiguration(
         alpn_protocols=["h3"],
         idle_timeout=2)
 
     try:
         async with connect(
-            hostname,
+            domain_name,
             443,
             configuration=configuration,
             create_protocol=DummyProtocol
         ):
-            print(f"{hostname:20} | QUIC  | OK")
-            return True
+            logging.info(f"{domain_name:20} | QUIC  | OK")
+            return QuicCheckResult(
+                success=True,
+                details=None
+            )
 
+    except ssl.SSLCertVerificationError:
+        logging.info(f"{domain_name:20} | QUIC  | Bad certificate")
+        return QuicCheckResult(
+            success=False,
+            details="Bad certificate"
+        )
     except ConnectionError:
         if code == 1:
-            print(f"{hostname:20} | QUIC  | Timeout")
+            logging.info(f"{domain_name:20} | QUIC  | Timeout")
+            return QuicCheckResult(
+                success=False,
+                details="Timeout"
+            )
         elif code == 296:
-            print(f"{hostname:20} | QUIC  | Instant fail")
+            logging.info(f"{domain_name:20} | QUIC  | Instant fail")
+            return QuicCheckResult(
+                success=False,
+                details="Instant fail"
+            )
         else:
-            print(f"{hostname:20} | QUIC  | {code}")
-
+            logging.warning(f"{domain_name:20} | QUIC  | {code}")
+            return QuicCheckResult(
+                success=False,
+                details=str(code)
+            )
     except Exception as e:
-        print(f"Unexpected error happened! {e}")
-        raise
-
-    # finally:
-    #     print(ERROR_CODES.get(code))
+        logging.error(f"Unexpected error happened! {e}")

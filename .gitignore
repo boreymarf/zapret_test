@@ -215,7 +215,8 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Borey
+# This project
 test.py
-vhs.vhs
+demo.tape
 demo.gif
+hostlists/
