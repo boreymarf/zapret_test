@@ -214,3 +214,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Borey
+test.py
+vhs.vhs
+demo.gif
