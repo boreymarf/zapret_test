@@ -9,7 +9,8 @@ DEFAULT_DOMAINS = [
     "facebook.com",
     "torproject.org",
     "tails.net",
-
+    "discord.com",
+    "cloudflare-ech.com"
 ]
 
 

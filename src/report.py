@@ -23,18 +23,18 @@ def print_report(results) -> None:
             if result['quic'].success:
                 successes['quic'] += 1
 
-    print("|-----------------------------------------------------------|")
-    print("|                        Report                             |")
-    print("|-----------------------------------------------------------|")
-    print("| Domain                | HTTP      | HTTPS     | QUIC      |")
-    print("|-----------------------|-----------|-----------|-----------|")
+    print("|---------------------------------------------------------------------|")
+    print("|                              Report                                 |")
+    print("|---------------------------------------------------------------------|")
+    print("| Domain                    | HTTP        | HTTPS       | QUIC        |")
+    print("|---------------------------|-------------|-------------|-------------|")
     for domain, result in results.items():
         http = "OK" if result['http'].success else "Fail"
         https = "OK" if result['https'].success else "Fail"
         quic = "Skipped" if result['quic'] is None else "OK" if result['quic'].success else "Fail"
 
-        print(f"| {domain:21} | {http:9} | {https:9} | {quic:9} |")
-    print("|-----------------------|-----------|-----------|-----------|")
+        print(f"| {domain:25} | {http:11} | {https:11} | {quic:11} |")
+    print("|---------------------------|-------------|-------------|-------------|")
 
     http_percent = successes['http'] / total['http'] * 100 if total['http'] > 0 else 0
     https_percent = successes['https'] / total['https'] * 100 if total['https'] > 0 else 0
@@ -44,4 +44,4 @@ def print_report(results) -> None:
     https_str = f"{successes['https']}/{total['https']} ({https_percent:.0f}%)"
     quic_str = f"{successes['quic']}/{total['quic']} ({quic_percent:.0f}%)"
 
-    print(f"| Total:                | {http_str:9} | {https_str:9} | {quic_str:9} |")
+    print(f"| Total:                    | {http_str:11} | {https_str:11} | {quic_str:11} |")
